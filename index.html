@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🚀 KOP - محلل التداول</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --success: #00ff88;
+            --danger: #ff3366;
+            --dark: #0a0e27;
+            --card: #1a1f3a;
+            --border: #2d3561;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, #0f0a2e 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--primary);
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .status {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        input, select {
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Arial;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-analyze {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--primary), #0099cc);
+            border: none;
+            color: #000;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-analyze:active {
+            transform: scale(0.95);
+        }
+
+        .btn-analyze:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .signal-card {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+
+        .signal-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .symbol {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .timeframe {
+            background: var(--border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .signal-type {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin: 12px 0;
+            letter-spacing: 1px;
+        }
+
+        .signal-type.buy {
+            color: var(--success);
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .signal-type.sell {
+            color: var(--danger);
+            text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
+        }
+
+        .signal-type.neutral {
+            color: #ffaa00;
+        }
+
+        .price-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--primary);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+
+        .price-label {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 3px;
+        }
+
+        .price-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .strength-bar {
+            background: var(--border);
+            height: 10px;
+            border-radius: 5px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            transition: width 0.3s;
+        }
+
+        .agreement-text {
+            text-align: center;
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--danger);
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--success);
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .strategy-list {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .strategy-tag {
+            display: inline-block;
+            background: var(--border);
+            color: #aaa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 10px;
+        }
+
+        .strategy-tag.active {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .note {
+            background: rgba(255, 170, 0, 0.1);
+            border-left: 3px solid #ffaa00;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #ffaa00;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .signal-type {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 KOP</h1>
+            <p style="color: #aaa; font-size: 12px;">محلل التداول الذكي</p>
+            <div class="status">نسخة تجريبية مجانية</div>
+        </header>
+
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="symbol" 
+                placeholder="الرمز (EURUSD)" 
+                value="EURUSD"
+                maxlength="10"
+            >
+            <select id="timeframe">
+                <option>M5</option>
+                <option>M15</option>
+                <option>M30</option>
+                <option selected>H1</option>
+                <option>H4</option>
+                <option>D1</option>
+            </select>
+            <button class="btn-analyze" onclick="analyzeSymbol()">
+                تحليل الآن 📊
+            </button>
+        </div>
+
+        <div id="note" class="note" style="display: none;">
+            ⚠️ هذه نسخة تجريبية - البيانات محاكاة للتوضيح فقط
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">جاري التحليل...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="signals-container"></div>
+    </div>
+
+    <script>
+        // بيانات محاكاة للتجربة (Demo Data)
+        const demoData = {
+            'EURUSD': {
+                'M5': { signal: 'BUY', entry: 1.0950, tp: 1.0975, sl: 1.0925 },
+                'M15': { signal: 'BUY', entry: 1.0948, tp: 1.0980, sl: 1.0920 },
+                'M30': { signal: 'SELL', entry: 1.0952, tp: 1.0925, sl: 1.0980 },
+                'H1': { signal: 'BUY', entry: 1.0950, tp: 1.1000, sl: 1.0900 },
+                'H4': { signal: 'NEUTRAL', entry: 1.0950, tp: 1.0970, sl: 1.0930 },
+                'D1': { signal: 'BUY', entry: 1.0940, tp: 1.1050, sl: 1.0850 }
+            },
+            'GBPUSD': {
+                'M5': { signal: 'SELL', entry: 1.2750, tp: 1.2720, sl: 1.2780 },
+                'M15': { signal: 'SELL', entry: 1.2752, tp: 1.2715, sl: 1.2785 },
+                'M30': { signal: 'BUY', entry: 1.2748, tp: 1.2780, sl: 1.2710 },
+                'H1': { signal: 'SELL', entry: 1.2750, tp: 1.2650, sl: 1.2850 },
+                'H4': { signal: 'NEUTRAL', entry: 1.2750, tp: 1.2800, sl: 1.2700 },
+                'D1': { signal: 'BUY', entry: 1.2700, tp: 1.2900, sl: 1.2500 }
+            },
+            'USDJPY': {
+                'M5': { signal: 'BUY', entry: 149.50, tp: 149.80, sl: 149.20 },
+                'M15': { signal: 'BUY', entry: 149.48, tp: 149.85, sl: 149.15 },
+                'M30': { signal: 'NEUTRAL', entry: 149.50, tp: 149.75, sl: 149.25 },
+                'H1': { signal: 'BUY', entry: 149.50, tp: 150.50, sl: 148.50 },
+                'H4': { signal: 'SELL', entry: 149.50, tp: 148.50, sl: 150.50 },
+                'D1': { signal: 'BUY', entry: 149.00, tp: 151.00, sl: 147.00 }
+            },
+            'GOLD': {
+                'M5': { signal: 'SELL', entry: 2050, tp: 2040, sl: 2060 },
+                'M15': { signal: 'SELL', entry: 2051, tp: 2038, sl: 2062 },
+                'M30': { signal: 'BUY', entry: 2050, tp: 2070, sl: 2030 },
+                'H1': { signal: 'SELL', entry: 2050, tp: 1950, sl: 2150 },
+                'H4': { signal: 'NEUTRAL', entry: 2050, tp: 2100, sl: 2000 },
+                'D1': { signal: 'BUY', entry: 2000, tp: 2200, sl: 1800 }
+            }
+        };
+
+        function analyzeSymbol() {
+            const symbol = document.getElementById('symbol').value.toUpperCase();
+            const timeframe = document.getElementById('timeframe').value;
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+            const noteDiv = document.getElementById('note');
+            const container = document.getElementById('signals-container');
+
+            // Reset
+            errorDiv.style.display = 'none';
+            container.innerHTML = '';
+            noteDiv.style.display = 'block';
+
+            if (!symbol) {
+                errorDiv.textContent = '❌ الرجاء إدخال الرمز';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Show loading
+            loadingDiv.style.display = 'block';
+
+            // Simulate API call
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+
+                if (!demoData[symbol]) {
+                    errorDiv.textContent = `❌ الرمز "${symbol}" غير متوفر. جرّب: EURUSD, GBPUSD, USDJPY, GOLD`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                const data = demoData[symbol][timeframe];
+                
+                // Generate signal strength based on all timeframes
+                const allSignals = Object.values(demoData[symbol]);
+                const buyCount = allSignals.filter(s => s.signal === 'BUY').length;
+                const sellCount = allSignals.filter(s => s.signal === 'SELL').length;
+                const totalSignals = buyCount + sellCount;
+                
+                let strength = 0;
+                if (data.signal === 'BUY') {
+                    strength = (buyCount / totalSignals) * 100;
+                } else if (data.signal === 'SELL') {
+                    strength = (sellCount / totalSignals) * 100;
+                } else {
+                    strength = 50;
+                }
+
+                // Create signal card
+                const card = createSignalCard(symbol, timeframe, data, strength);
+                container.appendChild(card);
+            }, 1500);
+        }
+
+        function createSignalCard(symbol, timeframe, data, strength) {
+            const card = document.createElement('div');
+            card.className = 'signal-card';
+
+            const signalTypeText = data.signal === 'BUY' ? '📈 شراء' : 
+                                   data.signal === 'SELL' ? '📉 بيع' : 
+                                   '⚪ محايد';
+
+            const signalClass = data.signal.toLowerCase();
+
+            const riskReward = Math.abs(data.tp - data.entry) / Math.abs(data.entry - data.sl);
+
+            card.innerHTML = `
+                <div class="signal-header">
+                    <span class="symbol">${symbol}</span>
+                    <span class="timeframe">${timeframe}</span>
+                </div>
+
+                <div class="signal-type ${signalClass}">${signalTypeText}</div>
+
+                <div class="price-box">
+                    <div class="price-label">نقطة الدخول</div>
+                    <div class="price-value">${data.entry.toFixed(4)}</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="price-box" style="border-left-color: var(--success);">
+                        <div class="price-label">جني الأرباح (TP)</div>
+                        <div class="price-value" style="color: var(--success);">${data.tp.toFixed(4)}</div>
+                    </div>
+                    <div class="price-box" style="border-left-color: var(--danger);">
+                        <div class="price-label">إيقاف الخسارة (SL)</div>
+                        <div class="price-value" style="color: var(--danger);">${data.sl.toFixed(4)}</div>
+                    </div>
+                </div>
+
+                <div class="strength-bar">
+                    <div class="strength-fill" style="width: ${strength}%"></div>
+                </div>
+                <div class="agreement-text">قوة الإشارة: ${strength.toFixed(1)}%</div>
+
+                <div style="margin-top: 10px; padding: 10px; background: rgba(0, 212, 255, 0.1); border-radius: 4px; font-size: 11px;">
+                    <strong>نسبة المكسب/الخسارة:</strong> 1:${riskReward.toFixed(2)}
+                </div>
+            `;
+
+            return card;
+        }
+
+        // تحليل عند الضغط على Enter
+        document.getElementById('symbol').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') analyzeSymbol();
+        });
+
+        // Show note on load
+        window.addEventListener('load', function() {
+            document.getElementById('note').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
